@@ -41,7 +41,7 @@ class PostsController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\Posts\CreatePostsRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(CreatePostsRequest $request)
@@ -52,11 +52,11 @@ class PostsController extends Controller
         $post = Post::create([
             'title' => $request->title,
             'description' => $request->description,
-//            'content' => $request->content,
             'content' => $request->content,
             'image' => $image,
             'published_at' => $request->published_at,
-            'category_id' => $request->category
+            'category_id' => $request->category,
+            'user_id' => auth()->user()->id
         ]);
         // attach the tags to post_tag table, to show which tags are associated with this post
         if ($request->tags) {
@@ -82,7 +82,7 @@ class PostsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  Post $post
      * @return \Illuminate\Http\Response
      */
     public function edit(Post $post) // use route model binding instead of just passing the post id
@@ -93,8 +93,8 @@ class PostsController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \App\Http\Requests\Posts\UpdatePostRequest  $request
+     * @param  Post $post
      * @return \Illuminate\Http\Response
      */
     public function update(UpdatePostRequest $request, Post $post)
@@ -162,6 +162,12 @@ class PostsController extends Controller
 //        return view('posts.index')->withPosts($trashed);
         return view('posts.index')->with(compact('posts','trashed'));
     }
+    /**
+     * Restore the specified post.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function restore($id)
     {
         $post = Post::withTrashed()->where('id', $id)->firstOrFail();
